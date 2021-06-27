@@ -1,5 +1,7 @@
 import UIKit
 
+public typealias ImageViewerListener = (String, ((UIViewController, UIImage?) -> ())?)
+
 extension UIImageView {
     
     // Data holder tap recognizer
@@ -9,6 +11,7 @@ extension UIImageView {
         var imageLoader:ImageLoader?
         var initialIndex:Int = 0
         var options:[ImageViewerOption] = []
+        var actions: [ImageViewerListener] = []
     }
     
     private var vc:UIViewController? {
@@ -73,7 +76,9 @@ extension UIImageView {
         options:[ImageViewerOption] = [],
         placeholder: UIImage? = nil,
         from:UIViewController? = nil,
-        imageLoader:ImageLoader? = nil) {
+        imageLoader:ImageLoader? = nil,
+        actions: [ImageViewerListener] = []
+        ) {
         
         let datasource = SimpleImageDatasource(
             imageItems: urls.compactMap {
@@ -84,7 +89,8 @@ extension UIImageView {
             initialIndex: initialIndex,
             options: options,
             from: from,
-            imageLoader: imageLoader)
+            imageLoader: imageLoader,
+            actions: actions)
     }
     
     public func setupImageViewer(
@@ -107,7 +113,9 @@ extension UIImageView {
         initialIndex:Int = 0,
         options:[ImageViewerOption] = [],
         from: UIViewController? = nil,
-        imageLoader:ImageLoader? = nil) {
+        imageLoader:ImageLoader? = nil,
+        actions: [ImageViewerListener] = []
+        ) {
         
         var _tapRecognizer:TapWithDataRecognizer?
         gestureRecognizers?.forEach {
@@ -128,6 +136,7 @@ extension UIImageView {
             _tapRecognizer!.numberOfTapsRequired = 1
         }
         // Pass the Data
+        _tapRecognizer!.actions = actions
         _tapRecognizer!.imageDatasource = datasource
         _tapRecognizer!.imageLoader = imageLoader
         _tapRecognizer!.initialIndex = initialIndex
@@ -144,7 +153,8 @@ extension UIImageView {
             imageDataSource: sender.imageDatasource,
             imageLoader: sender.imageLoader ?? URLSessionImageLoader(),
             options: sender.options,
-            initialIndex: sender.initialIndex)
+            initialIndex: sender.initialIndex
+            )
         let presentFromVC = sender.from ?? vc
         presentFromVC?.present(imageCarousel, animated: true)
     }
