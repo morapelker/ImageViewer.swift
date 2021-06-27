@@ -57,13 +57,18 @@ public class ImageCarouselViewController:UIPageViewController, ImageViewerTransi
     
     private let imageViewerPresentationDelegate = ImageViewerTransitionPresentationManager()
     
+    private var actions: [ImageViewerListener]
+    
     public init(
         sourceView:UIImageView,
         imageDataSource: ImageDataSource?,
         imageLoader: ImageLoader,
         options:[ImageViewerOption] = [],
-        initialIndex:Int = 0) {
+        initialIndex:Int = 0,
+        actions: [ImageViewerListener] = []
+        ) {
         
+        self.actions = actions
         self.initialSourceView = sourceView
         self.initialIndex = initialIndex
         self.options = options
@@ -145,7 +150,7 @@ public class ImageCarouselViewController:UIPageViewController, ImageViewerTransi
             let initialVC:ImageViewerController = .init(
                 index: initialIndex,
                 imageItem: imageDatasource.imageItem(at: initialIndex),
-                imageLoader: imageLoader)
+                imageLoader: imageLoader, actions: actions)
             setViewControllers([initialVC], direction: .forward, animated: true)
         }
     }
@@ -197,7 +202,7 @@ extension ImageCarouselViewController:UIPageViewControllerDataSource {
         return ImageViewerController.init(
             index: newIndex,
             imageItem:  imageDatasource.imageItem(at: newIndex),
-            imageLoader: vc.imageLoader)
+            imageLoader: vc.imageLoader, actions: actions)
     }
     
     public func pageViewController(
@@ -212,6 +217,6 @@ extension ImageCarouselViewController:UIPageViewControllerDataSource {
         return ImageViewerController.init(
             index: newIndex,
             imageItem: imageDatasource.imageItem(at: newIndex),
-            imageLoader: vc.imageLoader)
+            imageLoader: vc.imageLoader, actions: actions)
     }
 }

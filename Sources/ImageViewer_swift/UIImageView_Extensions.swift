@@ -153,7 +153,8 @@ extension UIImageView {
             imageDataSource: sender.imageDatasource,
             imageLoader: sender.imageLoader ?? URLSessionImageLoader(),
             options: sender.options,
-            initialIndex: sender.initialIndex
+            initialIndex: sender.initialIndex,
+            actions: sender.actions
             )
         let presentFromVC = sender.from ?? vc
         presentFromVC?.present(imageCarousel, animated: true)

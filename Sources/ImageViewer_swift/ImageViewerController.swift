@@ -33,14 +33,18 @@ UIGestureRecognizerDelegate {
     private var isAnimating:Bool = false
     private var maxZoomScale:CGFloat = 1.0
     
+    private var actions: [ImageViewerListener]
+    
     init(
         index: Int,
         imageItem:ImageItem,
-        imageLoader: ImageLoader) {
+        imageLoader: ImageLoader,
+        actions: [ImageViewerListener]) {
 
         self.index = index
         self.imageItem = imageItem
         self.imageLoader = imageLoader
+        self.actions = actions
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -121,8 +125,28 @@ UIGestureRecognizerDelegate {
         updateMinMaxZoomScaleForSize(view.bounds.size)
     }
     
+    @objc private func longTapped(_ gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            if actions.isEmpty {
+                return
+            }
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+            actions.forEach { (item) in
+                alert.addAction(UIAlertAction(title: item.0, style: .default, handler: { [weak self] (_) in
+                    guard let self = self else { return }
+                    item.1?(self, self.imageView.image)
+                }))
+            }
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    
     // MARK: Add Gesture Recognizers
     func addGestureRecognizers() {
+        
+        let longTapGesture = UILongPressGestureRecognizer(target: self, action: #selector(longTapped(_:)))
+        scrollView.addGestureRecognizer(longTapGesture)
+        
         
         let panGesture = UIPanGestureRecognizer(
             target: self, action: #selector(didPan(_:)))
